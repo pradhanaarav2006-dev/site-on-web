@@ -1,9 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     const api = new PokeAPI();
     const ui = new UI();
+    ui.setApi(api); // Pass API to UI for form-specific evolution fetching
 
     let allPokemon = []; // Master list
-    let currentGen = 'gen1';
+    let currentGen = localStorage.getItem('pokedex-gen') || 'gen1';
 
     async function fetchPokemonByGen(gen) {
         ui.showLoading();
@@ -12,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Generation ranges (National Dex IDs):
         // Gen 1: 1-151 (151), Gen 2: 152-251 (100), Gen 3: 252-386 (135),
         // Gen 4: 387-493 (107), Gen 5: 494-649 (156), Gen 6: 650-721 (72),
-        // Gen 7: 722-809 (88), Gen 8: 810-905 (96)
+        // Gen 7: 722-809 (88), Gen 8: 810-905 (96), Gen 9: 906-1025 (120)
         const genConfig = {
             gen1: { offset: 0, limit: 151, label: '1' },
             gen2: { offset: 151, limit: 100, label: '2' },
@@ -21,14 +22,14 @@ document.addEventListener('DOMContentLoaded', () => {
             gen5: { offset: 493, limit: 156, label: '5' },
             gen6: { offset: 649, limit: 72, label: '6' },
             gen7: { offset: 721, limit: 88, label: '7' },
-            gen8: { offset: 809, limit: 96, label: '8' }
+            gen8: { offset: 809, limit: 96, label: '8' },
+            gen9: { offset: 905, limit: 120, label: '9' }
         };
 
         try {
             const config = genConfig[gen];
             if (config) {
                 allPokemon = await api.getPokemonList(config.offset, config.limit);
-                document.getElementById('gen-label').textContent = config.label;
             }
             ui.renderCards(allPokemon);
         } catch (err) {
@@ -38,21 +39,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function init() {
-        await fetchPokemonByGen('gen1');
+        // Restore saved generation
+        const savedGen = localStorage.getItem('pokedex-gen') || 'gen1';
+        currentGen = savedGen;
 
-        // Generation Switcher Logic
         const genSelect = document.getElementById('gen-select');
         if (genSelect) {
+            genSelect.value = currentGen; // Set dropdown to saved value
+
             genSelect.addEventListener('change', (e) => {
                 const val = e.target.value;
                 if (val !== currentGen) {
                     currentGen = val;
+                    localStorage.setItem('pokedex-gen', currentGen); // Save to localStorage
                     // Clear search when switching gen
                     document.getElementById('search-input').value = '';
                     fetchPokemonByGen(currentGen);
                 }
             });
         }
+
+        await fetchPokemonByGen(currentGen);
     }
 
     // Search Logic

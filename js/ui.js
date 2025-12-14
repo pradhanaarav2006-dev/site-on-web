@@ -16,6 +16,7 @@ class UI {
         this.modalForms = document.getElementById('modal-forms');
 
         this.currentForms = []; // Store forms for switching
+        this.api = null; // Will be set by app.js
 
         this.setupEventListeners();
     }
@@ -64,7 +65,10 @@ class UI {
 
         // Dynamic border color based on primary type
         const primaryType = pokemon.types[0];
-        div.style.borderTop = `4px solid var(--type-${primaryType})`;
+        div.style.setProperty('--type-color', `var(--type-${primaryType})`);
+
+        // Initial border top (keeps existing design but uses variable)
+        div.style.borderTop = `4px solid var(--type-color)`;
 
         div.innerHTML = `
             <span class="card-id">#${pokemon.id.toString().padStart(3, '0')}</span>
@@ -290,5 +294,28 @@ class UI {
         // Update visuals background
         const primaryType = form.types[0];
         this.modalVisuals.style.background = `radial-gradient(circle at center, var(--type-${primaryType}) 0%, transparent 70%)`;
+
+        // Fetch and update evolution chain for this form
+        if (this.api && form.pokemonId) {
+            this.modalEvolutions.innerHTML = '<p style="color: var(--clr-text-muted);">Loading evolutions...</p>';
+
+            // Detect region from form name
+            let region = null;
+            const formNameLower = form.fullName ? form.fullName.toLowerCase() : '';
+            if (formNameLower.includes('-galar')) region = 'galar';
+            else if (formNameLower.includes('-alola')) region = 'alola';
+            else if (formNameLower.includes('-hisui')) region = 'hisui';
+            else if (formNameLower.includes('-paldea')) region = 'paldea';
+
+            this.api.getEvolutionChain(form.pokemonId, region).then(evoChain => {
+                this.renderEvolutionChain(evoChain);
+            }).catch(() => {
+                this.modalEvolutions.innerHTML = '<p style="color: var(--clr-text-muted);">Evolution data unavailable.</p>';
+            });
+        }
+    }
+
+    setApi(api) {
+        this.api = api;
     }
 }
