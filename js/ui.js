@@ -35,10 +35,108 @@ class UI {
                 this.closeModal();
             }
         });
+
+        // Double-click on modal image to toggle shiny
+        this.modalImg.addEventListener('dblclick', () => {
+            this.toggleShiny();
+        });
+
+        // Add cursor style to indicate interactivity
+        this.modalImg.style.cursor = 'pointer';
     }
 
     clearGrid() {
         this.grid.innerHTML = '';
+    }
+
+    addJumpToNav() {
+        const nav = document.createElement('div');
+        nav.className = 'jump-to-nav';
+        nav.style.cssText = `
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--card-radius);
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            border: 1px solid var(--glass-border);
+        `;
+
+        const generations = ['Gen 1', 'Gen 2', 'Gen 3', 'Gen 4', 'Gen 5', 'Gen 6', 'Gen 7', 'Gen 8', 'Gen 9'];
+
+        nav.innerHTML = `
+            <span style="font-weight: 700; color: var(--clr-text-muted); margin-right: 0.5rem;">Jump to</span>
+            ${generations.map((gen, i) => `
+                <a href="#gen-${i + 1}" style="
+                    padding: 0.4rem 0.8rem;
+                    color: var(--clr-accent);
+                    text-decoration: none;
+                    font-weight: 600;
+                    border-radius: 20px;
+                    transition: all 0.2s;
+                    font-size: 0.9rem;
+                " onmouseenter="this.style.background='var(--clr-accent)'; this.style.color='#000';" 
+                   onmouseleave="this.style.background='transparent'; this.style.color='var(--clr-accent)';">${gen}</a>
+            `).join('')}
+        `;
+
+        this.grid.appendChild(nav);
+    }
+
+    addGenerationHeader(genName, region, genNumber, firstPokemonId, lastPokemonId) {
+        const header = document.createElement('div');
+        header.className = 'generation-header';
+        header.id = `gen-${genNumber}`; // Anchor ID for jump-to
+        header.style.cssText = `
+            grid-column: 1 / -1;
+            padding: 2rem 0 1rem;
+            text-align: center;
+            border-bottom: 2px solid var(--glass-border);
+            margin-bottom: 1rem;
+            scroll-margin-top: 100px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+        `;
+
+        const spriteUrl = (id) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+
+        header.innerHTML = `
+            <img src="${spriteUrl(firstPokemonId)}" alt="First Pokemon" style="
+                width: 80px;
+                height: 80px;
+                object-fit: contain;
+                opacity: 0.3;
+                filter: grayscale(30%);
+            ">
+            <div style="text-align: center;">
+                <h2 style="font-size: 2rem; color: var(--clr-accent); margin: 0; text-transform: uppercase; letter-spacing: 3px;">${genName}</h2>
+                <p style="font-size: 0.9rem; color: var(--clr-text-muted); margin-top: 0.5rem;">${region} Region</p>
+            </div>
+            <img src="${spriteUrl(lastPokemonId)}" alt="Last Pokemon" style="
+                width: 80px;
+                height: 80px;
+                object-fit: contain;
+                opacity: 0.3;
+                filter: grayscale(30%);
+            ">
+        `;
+        this.grid.appendChild(header);
+    }
+
+    appendCards(pokemonList) {
+        const fragment = document.createDocumentFragment();
+        pokemonList.forEach(pokemon => {
+            const card = this.createCardElement(pokemon);
+            fragment.appendChild(card);
+        });
+        this.grid.appendChild(fragment);
     }
 
     renderCards(pokemonList) {
@@ -112,6 +210,13 @@ class UI {
         this.modalImg.src = pokemon.image;
         this.modalDesc.textContent = flavorText;
 
+        // Store sprite URLs for shiny toggle
+        this.currentPokemonId = pokemon.id;
+        this.isShiny = false;
+        this.normalSprite = pokemon.image;
+        // Construct shiny sprite URL
+        this.shinySprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${pokemon.id}.png`;
+
         // Reset types
         this.modalTypes.innerHTML = pokemon.types.map(type =>
             `<span class="type-badge" style="background-color: var(--type-${type}); color: white; padding: 0.5rem 1.2rem; font-size: 1rem;">${type}</span>`
@@ -147,8 +252,53 @@ class UI {
         const primaryType = pokemon.types[0];
         this.modalVisuals.style.background = `radial-gradient(circle at center, var(--type-${primaryType}) 0%, transparent 70%)`;
 
+        // Add shiny indicator
+        this.updateShinyIndicator();
+
         this.modal.classList.add('open');
         document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    toggleShiny() {
+        this.isShiny = !this.isShiny;
+        this.modalImg.src = this.isShiny ? this.shinySprite : this.normalSprite;
+        this.updateShinyIndicator();
+
+        // Add sparkle animation
+        this.modalImg.style.animation = 'none';
+        this.modalImg.offsetHeight; // Trigger reflow
+        this.modalImg.style.animation = 'shinyFlash 0.3s ease-out';
+    }
+
+    updateShinyIndicator() {
+        // Add or update shiny indicator badge
+        let indicator = document.getElementById('shiny-indicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'shiny-indicator';
+            indicator.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                padding: 0.3rem 0.6rem;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                transition: all 0.3s;
+                cursor: pointer;
+            `;
+            this.modalVisuals.style.position = 'relative';
+            this.modalVisuals.appendChild(indicator);
+        }
+
+        if (this.isShiny) {
+            indicator.innerHTML = '✨ Shiny';
+            indicator.style.background = 'linear-gradient(135deg, #ffd700, #ff6b6b)';
+            indicator.style.color = '#000';
+            indicator.style.display = 'block';
+        } else {
+            indicator.style.display = 'none';
+        }
     }
 
     renderEvolutionChain(branches) {
@@ -174,7 +324,7 @@ class UI {
                 }
 
                 html += `
-                    <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                    <div class="evo-pokemon" data-pokemon-id="${evo.id}" style="display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: transform 0.2s;" onmouseenter="this.style.transform='scale(1.1)'" onmouseleave="this.style.transform='scale(1)'">
                         <img src="${evo.image}" alt="${evo.name}" style="width: 50px; height: 50px; object-fit: contain;" loading="lazy">
                         <span style="font-size: 0.7rem; text-transform: capitalize; color: var(--clr-text-main);">${evo.name}</span>
                     </div>
@@ -185,6 +335,40 @@ class UI {
         });
 
         this.modalEvolutions.innerHTML = html;
+
+        // Add click handlers to evolution Pokemon
+        const self = this;
+        this.modalEvolutions.querySelectorAll('.evo-pokemon').forEach(evoEl => {
+            evoEl.addEventListener('click', async () => {
+                const pokemonId = parseInt(evoEl.getAttribute('data-pokemon-id'));
+                if (!pokemonId || !self.api) return;
+
+                try {
+                    // Fetch Pokemon data
+                    const pokemonData = await self.api.getPokemonDetails(
+                        `${self.api.baseUrl}/pokemon/${pokemonId}/`,
+                        pokemonId
+                    );
+
+                    if (pokemonData) {
+                        // Open modal with this Pokemon
+                        const flavorText = await self.api.getFlavorText(pokemonId);
+                        self.openModal(pokemonData, flavorText);
+
+                        // Fetch evolution chain and forms
+                        const [evoChain, forms] = await Promise.all([
+                            self.api.getEvolutionChain(pokemonId),
+                            self.api.getAlternateForms(pokemonId)
+                        ]);
+
+                        self.renderEvolutionChain(evoChain);
+                        self.renderForms(forms);
+                    }
+                } catch (err) {
+                    console.error('Error opening evolution Pokemon:', err);
+                }
+            });
+        });
     }
 
     closeModal() {
@@ -257,9 +441,14 @@ class UI {
             }
         });
 
-        // Update image
+        // Update image and shiny sprite URLs for this form
         console.log('Setting image to:', form.image);
+        this.normalSprite = form.image;
+        this.currentPokemonId = form.pokemonId;
+        this.shinySprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/${form.pokemonId}.png`;
+        this.isShiny = false; // Reset to normal when switching forms
         document.getElementById('modal-img').src = form.image;
+        this.updateShinyIndicator();
 
         // Update types
         this.modalTypes.innerHTML = form.types.map(type =>

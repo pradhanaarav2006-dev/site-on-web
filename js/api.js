@@ -49,8 +49,57 @@ class PokeAPI {
             'malamar': 'Lv. 30 (upside down)',
             'runerigus': '49+ damage near Dusty Bowl',
             'sirfetchd': '3 Critical Hits in battle',
-            'alcremie': 'Spin with Sweet item'
+            'alcremie': 'Spin with Sweet item',
+            'clodsire': 'Lv. 20',
+            'sneasler': 'Razor Claw (day)',
+            'overqwil': 'Strong Style Barb Barrage 20x',
+            'wyrdeer': 'Psyshield Bash 20x',
+            'kleavor': 'Black Augurite',
+            'ursaluna': 'Peat Block (full moon)',
+            'basculegion': 'Recoil damage 294+'
         };
+
+        // Pokemon with exclusive regional pre-evolutions (key: species name, value: {region, preEvo})
+        // These Pokemon ONLY evolve from their regional form, not the base form
+        this.regionalExclusiveEvolutions = {
+            'clodsire': { region: 'paldea', preEvo: 'wooper', method: 'Lv. 20' },
+            'sneasler': { region: 'hisui', preEvo: 'sneasel', method: 'Razor Claw (day)' },
+            'overqwil': { region: 'hisui', preEvo: 'qwilfish', method: 'Strong Style Barb Barrage 20x' },
+            'perrserker': { region: 'galar', preEvo: 'meowth', method: 'Lv. 28' },
+            'sirfetchd': { region: 'galar', preEvo: 'farfetchd', method: '3 Critical Hits' },
+            'mr-rime': { region: 'galar', preEvo: 'mr-mime', method: 'Lv. 42' },
+            'cursola': { region: 'galar', preEvo: 'corsola', method: 'Lv. 38' },
+            'obstagoon': { region: 'galar', preEvo: 'linoone', method: 'Lv. 35 (night)' },
+            'runerigus': { region: 'galar', preEvo: 'yamask', method: '49+ damage near Dusty Bowl' }
+        };
+
+        // Form name overrides (key: variety.pokemon.name, value: display name)
+        this.formNameOverrides = {
+            'greninja-ash': 'Battle Bond',
+            'pikachu-starter': 'Partner',
+            'eevee-starter': 'Partner'
+        };
+
+        // Forms to exclude from display
+        this.excludedForms = [
+            'greninja-battle-bond',  // Exclude "Battle Bond" since we rename Ash-Greninja to Battle Bond
+            // Cap Pikachu forms
+            'pikachu-original-cap',
+            'pikachu-hoenn-cap',
+            'pikachu-sinnoh-cap',
+            'pikachu-unova-cap',
+            'pikachu-kalos-cap',
+            'pikachu-alola-cap',
+            'pikachu-partner-cap',
+            'pikachu-world-cap',
+            // Cosplay Pikachu forms
+            'pikachu-cosplay',
+            'pikachu-rock-star',
+            'pikachu-belle',
+            'pikachu-pop-star',
+            'pikachu-phd',
+            'pikachu-libre'
+        ];
     }
 
     async getPokemonList(offset = 0, limit = 151) {
@@ -130,6 +179,11 @@ class PokeAPI {
 
             // Fetch each variety's data
             for (const variety of speciesData.varieties) {
+                // Skip excluded forms
+                if (this.excludedForms.includes(variety.pokemon.name)) {
+                    continue;
+                }
+
                 try {
                     const pokemonRes = await fetch(variety.pokemon.url);
                     const pokemonData = await pokemonRes.json();
@@ -138,7 +192,10 @@ class PokeAPI {
                     let formName = variety.pokemon.name;
                     const baseName = speciesData.name;
 
-                    if (formName === baseName) {
+                    // Check for name override first
+                    if (this.formNameOverrides[variety.pokemon.name]) {
+                        formName = this.formNameOverrides[variety.pokemon.name];
+                    } else if (formName === baseName) {
                         formName = 'Default';
                     } else {
                         // Extract form suffix (e.g., "pikachu-gmax" -> "Gmax")
@@ -224,12 +281,14 @@ class PokeAPI {
     async getEvolutionChain(pokemonId, region = null) {
         try {
             let speciesUrl;
+            let speciesName = null;
 
             // For form Pokemon (IDs 10000+), we need to fetch the Pokemon first to get species URL
             if (pokemonId >= 10000) {
                 const pokemonRes = await fetch(`${this.baseUrl}/pokemon/${pokemonId}/`);
                 const pokemonData = await pokemonRes.json();
                 speciesUrl = pokemonData.species.url;
+                speciesName = pokemonData.species.name;
             } else {
                 speciesUrl = `${this.baseUrl}/pokemon-species/${pokemonId}/`;
             }
@@ -237,6 +296,50 @@ class PokeAPI {
             // Get species data to find evolution chain URL
             const speciesRes = await fetch(speciesUrl);
             const speciesData = await speciesRes.json();
+            speciesName = speciesData.name;
+
+            // Check for regional-exclusive evolutions
+            // These Pokemon only evolve from their regional form
+            if (this.regionalExclusiveEvolutions[speciesName]) {
+                const exclusive = this.regionalExclusiveEvolutions[speciesName];
+
+                // Fetch the regional pre-evolution Pokemon data
+                const preEvoName = `${exclusive.preEvo}-${exclusive.region}`;
+                try {
+                    const preEvoRes = await fetch(`${this.baseUrl}/pokemon/${preEvoName}/`);
+                    const preEvoData = await preEvoRes.json();
+
+                    // Fetch the current Pokemon data
+                    const currentRes = await fetch(`${this.baseUrl}/pokemon/${speciesName}/`);
+                    const currentData = await currentRes.json();
+
+                    // Build custom evolution chain
+                    const regionCapitalized = exclusive.region.charAt(0).toUpperCase() + exclusive.region.slice(1);
+                    const preEvoDisplayName = `${regionCapitalized} ${exclusive.preEvo.charAt(0).toUpperCase() + exclusive.preEvo.slice(1)}`;
+
+                    const customChain = [[
+                        {
+                            name: preEvoDisplayName,
+                            id: preEvoData.id,
+                            image: preEvoData.sprites.other['official-artwork'].front_default ||
+                                `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${preEvoData.id}.png`,
+                            method: null
+                        },
+                        {
+                            name: speciesData.name.charAt(0).toUpperCase() + speciesData.name.slice(1),
+                            id: currentData.id,
+                            image: currentData.sprites.other['official-artwork'].front_default ||
+                                `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${currentData.id}.png`,
+                            method: exclusive.method
+                        }
+                    ]];
+
+                    return customChain;
+                } catch (e) {
+                    console.warn(`Could not build regional exclusive chain for ${speciesName}:`, e);
+                    // Fall through to normal chain if regional lookup fails
+                }
+            }
 
             // Fetch evolution chain
             const evoRes = await fetch(speciesData.evolution_chain.url);

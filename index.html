@@ -27,22 +27,27 @@
 
             <div class="header-controls"
                 style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; justify-content: center;">
-                <select id="gen-select" class="glass-panel"
-                    style="padding: 0.8rem; color: var(--clr-text-main); border-radius: 50px; border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.05); cursor: pointer; outline: none;">
-                    <option value="gen1" style="color: #333;">Generation 1</option>
-                    <option value="gen2" style="color: #333;">Generation 2</option>
-                    <option value="gen3" style="color: #333;">Generation 3</option>
-                    <option value="gen4" style="color: #333;">Generation 4</option>
-                    <option value="gen5" style="color: #333;">Generation 5</option>
-                    <option value="gen6" style="color: #333;">Generation 6</option>
-                    <option value="gen7" style="color: #333;">Generation 7</option>
-                    <option value="gen8" style="color: #333;">Generation 8</option>
-                    <option value="gen9" style="color: #333;">Generation 9</option>
-                </select>
-
-                <div class="search-container glass-panel">
-                    <i class="fa-solid fa-search search-icon"></i>
-                    <input type="text" id="search-input" class="search-input" placeholder="Search Pokemon...">
+                <div id="search-container" class="search-container glass-panel" style="
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    padding: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: all 0.4s ease;
+                    overflow: hidden;
+                ">
+                    <i id="search-toggle" class="fa-solid fa-search"
+                        style="font-size: 1.2rem; color: var(--clr-accent); transition: all 0.3s;"></i>
+                    <input type="text" id="search-input" class="search-input" placeholder="Search Pokemon..." style="
+                        width: 0;
+                        padding: 0;
+                        border: none;
+                        opacity: 0;
+                        transition: all 0.4s ease;
+                    ">
                 </div>
             </div>
         </div>
@@ -57,6 +62,27 @@
             </div>
         </div>
     </main>
+
+    <!-- Back to Top Button -->
+    <a href="#" id="back-to-top" title="Back to Top" style="
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--clr-accent), var(--clr-accent-secondary));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(0, 255, 204, 0.4);
+        transition: all 0.3s ease;
+        z-index: 999;
+    " onmouseenter="this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 25px rgba(0, 255, 204, 0.6)';"
+        onmouseleave="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(0, 255, 204, 0.4)';">
+        <i class="fa-solid fa-arrow-up" style="font-size: 1.2rem; color: #000;"></i>
+    </a>
 
     <!-- Detailed Modal -->
     <div id="pokemon-modal" class="modal-overlay">
