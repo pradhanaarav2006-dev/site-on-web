@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéDex Gen 1</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Outfit:wght@700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <header class="container">
+        <div class="header-content">
+            <div class="logo">PokéDex<span
+                    style="color: var(--clr-text-main); font-size: 0.5em; vertical-align: top; margin-left: 5px;">GEN
+                    <span id="gen-label">1</span></span></div>
+
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <select id="gen-select" class="glass-panel"
+                    style="padding: 0.8rem; color: var(--clr-text-main); border-radius: 50px; border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.05); cursor: pointer; outline: none;">
+                    <option value="gen1" style="color: #333;">Generation 1</option>
+                    <option value="gen2" style="color: #333;">Generation 2</option>
+                    <option value="gen3" style="color: #333;">Generation 3</option>
+                    <option value="gen4" style="color: #333;">Generation 4</option>
+                    <option value="gen5" style="color: #333;">Generation 5</option>
+                    <option value="gen6" style="color: #333;">Generation 6</option>
+                    <option value="gen7" style="color: #333;">Generation 7</option>
+                    <option value="gen8" style="color: #333;">Generation 8</option>
+                </select>
+
+                <div class="search-container glass-panel">
+                    <i class="fa-solid fa-search search-icon"></i>
+                    <input type="text" id="search-input" class="search-input" placeholder="Search Pokemon...">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Filters (Optional, can be added later) -->
+        <div id="pokedex-grid" class="pokedex-grid">
+            <!-- Cards will be injected here -->
+            <div class="pokemon-card glass-panel" style="justify-content: center; height: 300px;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 3rem; color: var(--clr-accent);"></i>
+            </div>
+        </div>
+    </main>
+
+    <!-- Detailed Modal -->
+    <div id="pokemon-modal" class="modal-overlay">
+        <div class="glass-panel modal-content">
+            <button id="close-modal" class="modal-close">&times;</button>
+
+            <div class="modal-visuals" id="modal-visuals">
+                <div id="modal-forms"
+                    style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem; max-width: 100%;">
+                </div>
+                <img src="" alt="" class="modal-img-big" id="modal-img">
+            </div>
+
+            <div class="modal-details">
+                <h2 id="modal-name" style="text-transform: capitalize; font-size: 2.5rem; margin-bottom: 0.5rem;">
+                    Pokemon Name</h2>
+                <div id="modal-types" class="pokemon-types" style="justify-content: flex-start; margin-bottom: 2rem;">
+                    <!-- Types -->
+                </div>
+
+                <div class="modal-section">
+                    <h3 style="margin-bottom: 1rem; color: var(--clr-accent);">Base Stats</h3>
+                    <div id="modal-stats">
+                        <!-- Stats -->
+                    </div>
+                </div>
+
+                <div class="modal-section" style="margin-top: 2rem;">
+                    <h3 style="margin-bottom: 1rem; color: var(--clr-accent);">About</h3>
+                    <p id="modal-desc" style="line-height: 1.6; color: var(--clr-text-muted);">
+                        Flavor text goes here...
+                    </p>
+                </div>
+
+                <div class="modal-section" style="margin-top: 2rem;">
+                    <h3 style="margin-bottom: 1rem; color: var(--clr-accent);">Evolution Chain</h3>
+                    <div id="modal-evolutions"
+                        style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: center;">
+                        <!-- Evolution chain rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

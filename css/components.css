@@ -1,0 +1,276 @@
+/* Pokemon Card */
+.pokemon-card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.pokemon-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card-id {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-md);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 700;
+}
+
+.card-img-container {
+    width: 120px;
+    height: 120px;
+    margin: var(--spacing-sm) 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.card-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.3));
+}
+
+.card-info {
+    text-align: center;
+    width: 100%;
+    z-index: 1;
+}
+
+.card-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+    text-transform: capitalize;
+    color: var(--text-primary);
+}
+
+.card-types {
+    display: flex;
+    gap: var(--spacing-xs);
+    justify-content: center;
+}
+
+.type-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Dynamic Type Backgrounds - will be added via JS or utility classes */
+.bg-normal {
+    background-color: var(--type-normal);
+}
+
+.bg-fire {
+    background-color: var(--type-fire);
+}
+
+.bg-water {
+    background-color: var(--type-water);
+}
+
+.bg-electric {
+    background-color: var(--type-electric);
+}
+
+.bg-grass {
+    background-color: var(--type-grass);
+}
+
+.bg-ice {
+    background-color: var(--type-ice);
+}
+
+.bg-fighting {
+    background-color: var(--type-fighting);
+}
+
+.bg-poison {
+    background-color: var(--type-poison);
+}
+
+.bg-ground {
+    background-color: var(--type-ground);
+}
+
+.bg-flying {
+    background-color: var(--type-flying);
+}
+
+.bg-psychic {
+    background-color: var(--type-psychic);
+}
+
+.bg-bug {
+    background-color: var(--type-bug);
+}
+
+.bg-rock {
+    background-color: var(--type-rock);
+}
+
+.bg-ghost {
+    background-color: var(--type-ghost);
+}
+
+.bg-dragon {
+    background-color: var(--type-dragon);
+}
+
+.bg-steel {
+    background-color: var(--type-steel);
+}
+
+.bg-fairy {
+    background-color: var(--type-fairy);
+}
+
+.bg-dark {
+    background-color: var(--type-dark);
+}
+
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-modal);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.3s;
+    backdrop-filter: blur(5px);
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-content {
+    background-color: var(--bg-secondary);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    border-radius: var(--radius-lg);
+    position: relative;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.close-btn {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    z-index: 10;
+}
+
+.modal-body {
+    padding: 0;
+}
+
+/* Modal Internal Sections (Skeleton for now) */
+.detail-header {
+    padding: var(--spacing-xl) var(--spacing-md);
+    text-align: center;
+    position: relative;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.detail-img {
+    width: 200px;
+    height: 200px;
+    filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.3));
+}
+
+.detail-info {
+    padding: var(--spacing-lg);
+    background: var(--bg-secondary);
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.stat-label {
+    width: 100px;
+    color: var(--text-secondary);
+}
+
+.stat-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    background: var(--accent);
+}
+
+.evolution-chain {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    margin-top: var(--spacing-md);
+}
+
+.evo-step {
+    text-align: center;
+}
+
+.evo-arrow {
+    font-weight: bold;
+    color: var(--text-secondary);
+}
